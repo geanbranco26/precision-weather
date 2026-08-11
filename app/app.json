@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Precision Weather",
+    "slug": "precision-weather",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": { "resizeMode": "contain", "backgroundColor": "#0B1320" },
+    "android": { "package": "com.precisionweather.app" }
+  }
+}

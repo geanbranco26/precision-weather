@@ -1,0 +1,17 @@
+{
+  "name": "precision-weather-app",
+  "version": "1.0.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": { "start": "expo start", "android": "expo start --android", "ios": "expo start --ios", "web": "expo start --web" },
+  "dependencies": {
+    "expo": "latest",
+    "expo-location": "latest",
+    "expo-status-bar": "latest",
+    "react": "latest",
+    "react-native": "latest",
+    "react-native-safe-area-context": "latest",
+    "react-native-screens": "latest"
+  },
+  "devDependencies": { "typescript": "latest", "@types/react": "latest" }
+}
