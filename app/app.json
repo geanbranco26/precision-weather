@@ -1,11 +1,18 @@
 {
   "expo": {
-    "name": "Precision Weather",
-    "slug": "precision-weather",
+    "name": "Previsão do tempo de precisão",
+    "slug": "previsao-do-tempo-de-precisao",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "splash": { "resizeMode": "contain", "backgroundColor": "#0B1320" },
-    "android": { "package": "com.precisionweather.app" }
+    "owner": "geanbranco26",
+    "extra": {
+      "eas": {
+        "projectId": "65636c3c-3bcb-4227-8abe-b991d7453dda"
+      }
+    },
+    "android": {
+      "package": "com.precisionweather.app"
+    }
   }
 }
