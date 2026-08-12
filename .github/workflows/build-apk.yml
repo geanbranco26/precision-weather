@@ -6,9 +6,6 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-
 jobs:
   build:
     name: Gerar APK
@@ -21,7 +18,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
           cache-dependency-path: app/package.json
 
@@ -41,7 +38,16 @@ jobs:
             --platform android \
             --profile preview \
             --non-interactive \
-            --wait
+            --wait \
+            --json > build-result.json
+
+      - name: Obter ID do build
+        working-directory: app
+        id: build-info
+        run: |
+          BUILD_ID=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('build-result.json','utf8')); console.log(Array.isArray(d) ? d[0].id : d.id)")
+          echo "BUILD_ID=$BUILD_ID" >> "$GITHUB_OUTPUT"
+          echo "Build ID: $BUILD_ID"
 
       - name: Baixar APK gerado
         working-directory: app
@@ -49,31 +55,32 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           mkdir -p artifacts
-
           eas build:download \
-            --platform android \
-            --non-interactive
-
-          APK=$(find . -type f -name "*.apk" -print -quit)
-
-          if [ -z "$APK" ]; then
-            echo "ERRO: nenhum arquivo APK foi encontrado."
-            exit 1
-          fi
-
-          echo "APK encontrado: $APK"
-          cp "$APK" artifacts/precision-weather.apk
+            --build-id "${{ steps.build-info.outputs.BUILD_ID }}" \
+            --non-interactive \
+            --output artifacts/app.apk
 
       - name: Verificar APK
         working-directory: app
         run: |
-          ls -lh artifacts/precision-weather.apk
-          file artifacts/precision-weather.apk
+          test -f artifacts/app.apk
+          ls -lh artifacts/app.apk
+          file artifacts/app.apk
 
       - name: Enviar APK para os artefatos do GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: Precision-Weather-APK
-          path: app/artifacts/precision-weather.apk
+          name: precision-weather-apk
+          path: app/artifacts/app.apk
           if-no-files-found: error
-          retention-days: 30
+
+      - name: Mostrar informações do build
+        if: always()
+        working-directory: app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build:list \
+            --platform android \
+            --limit 1 \
+            --non-interactive
