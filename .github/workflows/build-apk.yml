@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Gerar APK
@@ -35,6 +38,55 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --wait \
+            --json > build-result.json
+
+      - name: Obter URL do APK
+        working-directory: app
+        id: apk-info
+        run: |
+          APK_URL=$(node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('build-result.json', 'utf8'));
+            const build = Array.isArray(data) ? data[0] : data;
+            const url = build?.artifacts?.buildUrl;
+            if (!url) {
+              console.error('URL do APK não encontrada.');
+              console.error(JSON.stringify(build, null, 2));
+              process.exit(1);
+            }
+            console.log(url);
+          ")
+
+          echo "APK_URL=$APK_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Baixar APK
+        working-directory: app
+        run: |
+          mkdir -p artifacts
+
+          curl -L \
+            "${{ steps.apk-info.outputs.APK_URL }}" \
+            -o artifacts/precision-weather.apk
+
+          ls -lh artifacts/precision-weather.apk
+
+      - name: Verificar APK
+        working-directory: app
+        run: |
+          test -s artifacts/precision-weather.apk
+          file artifacts/precision-weather.apk
+
+      - name: Enviar APK para os artefatos do GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: Precision-Weather-APK
+          path: app/artifacts/precision-weather.apk
+          if-no-files-found: error
+          retention-days: 30          eas build \
             --platform android \
             --profile preview \
             --non-interactive \
