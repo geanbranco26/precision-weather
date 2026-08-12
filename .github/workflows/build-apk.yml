@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Gerar APK
@@ -18,7 +21,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: app/package.json
 
@@ -33,23 +36,49 @@ jobs:
         working-directory: app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas init --force --non-interactive
+        run: |
+          eas init --non-interactive
 
       - name: Gerar APK
         working-directory: app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas build --platform android --profile preview --non-interactive
+        run: |
+          eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive
 
-      - name: Mostrar informações do build
-        if: always()
+      - name: Baixar APK gerado
         working-directory: app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas build:list --platform android --limit 1
-      - name: Mostrar informações do build
-        if: always()
+        run: |
+          mkdir -p artifacts
+          eas build:download \
+            --platform android \
+            --non-interactive
+
+          APK=$(find . -type f -name "*.apk" -print -quit)
+
+          if [ -z "$APK" ]; then
+            echo "ERRO: nenhum arquivo APK foi encontrado."
+            exit 1
+          fi
+
+          echo "APK encontrado: $APK"
+          cp "$APK" artifacts/precision-weather.apk
+
+      - name: Verificar APK
         working-directory: app
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas build:list --platform android --limit 1
+        run: |
+          ls -lh artifacts/precision-weather.apk
+          file artifacts/precision-weather.apk
+
+      - name: Enviar APK para os artefatos do GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: Precision-Weather-APK
+          path: app/artifacts/precision-weather.apk
+          if-no-files-found: error
+          retention-days: 30
