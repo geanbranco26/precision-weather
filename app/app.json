@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Previsão do tempo de precisão",
-    "slug": "previsao-do-tempo-de-precisao",
+    "slug": "precision-weather",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
