@@ -170,10 +170,12 @@ export default function App() {
 
   const [error, setError] = useState<string | null>(null);
 
-  const [point, setPoint] = useState<Point>({
-    lat: -27.830,
-    lon: -50.349,
-    elevation: 900,
+  const [point, setPoint] = 
+  useState<Point>({
+  lat: -28.116667,
+  lon: -50.649806,
+  elevation: 927,
+});
   });
 
   async function load(p: Point = point) {
